@@ -1,8 +1,6 @@
 
 # QR Reader
 
-QR reader library with CameraX & Zxing for Android.
-
 **Min API Level = 21**
 
 ![Preview](https://github.com/murgupluoglu/qrreader-android/blob/master/github/sample.gif)
