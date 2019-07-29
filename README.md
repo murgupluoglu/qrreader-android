@@ -26,7 +26,7 @@ Add this to your app `build.gradle`:
 
 ```groovy
 dependencies {
-	implementation 'com.murgupluoglu.qrreader:QRReaderView:<latest-version>'
+	implementation 'com.github.murgupluoglu:qrreader-android:1.0.0'
 }
 ```
 
