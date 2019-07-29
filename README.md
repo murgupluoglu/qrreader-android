@@ -5,7 +5,7 @@ QR reader library with CameraX & Zxing for Android.
 
 **Min API Level = 21**
 
-![Preview](https://raw.githubusercontent.com/)
+![Preview](https://github.com/murgupluoglu/qrreader-android/blob/master/github/sample.gif)
 ## Setup
 
 ### Gradle
