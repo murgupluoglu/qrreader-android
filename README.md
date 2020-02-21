@@ -24,7 +24,7 @@ Add this to your app `build.gradle`:
 
 ```groovy
 dependencies {
-	implementation 'com.github.murgupluoglu:qrreader-android:1.0.0'
+	implementation 'com.github.murgupluoglu:qrreader-android:2.0.0'
 }
 ```
 
@@ -56,9 +56,15 @@ Add QRReaderView to your XML like any other view.
 #### Step 2
 Add listener for returned qr code.
 ```kotlin
-qrCodeReaderView.setListener { qrCode, status ->  
-  qrTextView.text = qrCode  
-}
+qrCodeReaderView.setListener(object : QRReaderListener{  
+    override fun onRead(barcode: FirebaseVisionBarcode, barcodes: List<FirebaseVisionBarcode>) {  
+        
+  }  
+  
+    override fun onError(exception: Exception) {  
+        
+    }  
+})
 ```
 #### Step 3
 Start camera
@@ -69,27 +75,23 @@ qrCodeReaderView.startCamera(this@MainActivity)
 #### Optional
 Set configuration and enable torch
 ```kotlin
-qrCodeReaderView.startCamera(  
-    this@MainActivity,  
-    QRCameraConfiguration(lensFacing = CameraX.LensFacing.BACK, readerMode = ImageAnalysis.ImageReaderMode.ACQUIRE_LATEST_IMAGE)
-)
+val firebaseOptions =  
+        FirebaseVisionBarcodeDetectorOptions.Builder().setBarcodeFormats(  
+                FirebaseVisionBarcode.FORMAT_QR_CODE,  
+                FirebaseVisionBarcode.FORMAT_AZTEC)  
+                .build()  
+val config = QRCameraConfiguration(lensFacing = CameraSelector.LENS_FACING_FRONT, options = firebaseOptions)
 
-qrCodeReaderView.enableTorch(!qrCodeReaderView.isTorchOn())
+qrCodeReaderView.startCamera(this@MainActivity, config)
+
+qrCodeReaderView.enableTorch(true)
 ```
 
 #### Use Inside Your CameraX Setup
 If you have CameraX setup in your code. You can use only QRAnalyzer class.
 ```kotlin
-val analysisConfig = ImageAnalysisConfig.Builder().apply {  
-  ...
-}.build()
-
-val imageAnalyzer = ImageAnalysis(analysisConfig)
-
-imageAnalyzer?.apply {  
-  analyzer = QRAnalyzer().apply {  
-    onFrameAnalyzed { qrCode, status, resultPoint, previewWidth, previewHeight, rotationDegrees ->  
-      //read qrCode and status    
-    }  
-}}
+imageAnalyzer.setAnalyzer(mainExecutor, QRAnalyzer(rotation, config.options).apply {  
+  onFrameAnalyzed { qrStatus, barcode, barcodes, exeption ->  
+  
+})
 ```
