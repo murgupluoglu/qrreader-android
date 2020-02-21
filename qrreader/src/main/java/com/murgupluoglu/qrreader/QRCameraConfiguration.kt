@@ -1,7 +1,8 @@
 package com.murgupluoglu.qrreader
 
-import androidx.camera.core.CameraX
-import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.CameraSelector
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions
 
 /*
 *  Created by Mustafa Ürgüplüoğlu on 05.07.2019.
@@ -9,7 +10,11 @@ import androidx.camera.core.ImageAnalysis
 */
 
 data class QRCameraConfiguration(
-    var lensFacing: CameraX.LensFacing = CameraX.LensFacing.BACK,
+        var lensFacing: Int = CameraSelector.LENS_FACING_BACK,
 
-    var readerMode: ImageAnalysis.ImageReaderMode = ImageAnalysis.ImageReaderMode.ACQUIRE_LATEST_IMAGE
+        var options: FirebaseVisionBarcodeDetectorOptions =
+                FirebaseVisionBarcodeDetectorOptions.Builder().setBarcodeFormats(
+                        FirebaseVisionBarcode.FORMAT_QR_CODE,
+                        FirebaseVisionBarcode.FORMAT_AZTEC)
+                .build()
 )

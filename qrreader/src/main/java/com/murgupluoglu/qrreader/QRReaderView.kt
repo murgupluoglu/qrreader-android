@@ -3,14 +3,15 @@ package com.murgupluoglu.qrreader
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Handler
-import android.os.HandlerThread
 import android.util.AttributeSet
-import android.util.Rational
-import android.view.TextureView
 import androidx.camera.core.*
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LiveData
+import com.google.common.util.concurrent.ListenableFuture
+import java.util.concurrent.Executor
 
 
 /*
@@ -20,74 +21,83 @@ import androidx.lifecycle.LifecycleOwner
 
 class QRReaderView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : TextureView(context, attrs, defStyleAttr) {
+) : PreviewView(context, attrs, defStyleAttr) {
 
     private lateinit var config: QRCameraConfiguration
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
+    private lateinit var mainExecutor: Executor
+    private lateinit var cameraProvider: ProcessCameraProvider
+    private lateinit var cameraSelector : CameraSelector
+    private lateinit var cameraProviderFuture : ListenableFuture<ProcessCameraProvider>
+    private lateinit var lifecycleOwner : LifecycleOwner
+    private var camera : Camera? = null
 
-    lateinit var qrReaderListener: QRReaderListener
+    private lateinit var qrReaderListener: QRReaderListener
 
-    inline fun setListener(crossinline listener: (qrCode: String, status: QRStatus) -> Unit) {
-        this.qrReaderListener = object : QRReaderListener {
-            override fun onReaded(qrCode: String, status: QRStatus) {
-                listener(qrCode, status)
-            }
-        }
+    fun setListener(listener : QRReaderListener) {
+        qrReaderListener = listener
     }
 
     private fun buildUseCases() {
 
-        //Preview
-        val previewConfig = PreviewConfig.Builder().apply {
-            setTargetAspectRatio(Rational(width, height))
-            setTargetRotation(display.rotation)
-            setLensFacing(config.lensFacing)
-        }.build()
+        cameraProviderFuture.addListener(Runnable {
 
-        preview = QRAutoFitPreviewBuilder.build(previewConfig, this@QRReaderView)
-        //End - Preview
+            cameraSelector = CameraSelector.Builder().requireLensFacing(config.lensFacing).build()
 
-        //ImageAnalyze
-        val analysisConfig = ImageAnalysisConfig.Builder().apply {
-            setTargetAspectRatio(Rational(width, height))
-            setLensFacing(config.lensFacing)
-            // Use a worker thread for image analysis to prevent preview glitches
-            val analyzerThread = HandlerThread("QRAnalyzer").apply { start() }
-            setCallbackHandler(Handler(analyzerThread.looper))
-            // In our analysis, we care more about the latest image than analyzing *every* image
-            setImageReaderMode(config.readerMode)
-            // Set initial target rotation, we will have to call this again if rotation changes
-            // during the lifecycle of this use case
-            setTargetRotation(display.rotation)
-        }.build()
 
-        imageAnalyzer = ImageAnalysis(analysisConfig)
+            val rotation = display.rotation
 
-        imageAnalyzer?.apply {
-            analyzer = QRAnalyzer().apply {
-                onFrameAnalyzed { qrCode, status, resultPoint, previewWidth, previewHeight, rotationDegrees ->
-                    qrReaderListener.onReaded(qrCode, status)
+
+            //Preview
+            preview = Preview.Builder()
+                    .setTargetName("Preview")
+                    .setTargetAspectRatio(AspectRatio.RATIO_16_9)
+                    .setTargetRotation(rotation)
+                    .build()
+
+            preview!!.setSurfaceProvider(previewSurfaceProvider)
+            //End - Preview
+
+            //ImageAnalyze
+            imageAnalyzer = ImageAnalysis.Builder()
+                    .setTargetName("Analysis")
+                    .setTargetAspectRatio(AspectRatio.RATIO_16_9)
+                    .setTargetRotation(rotation)
+                    .build()
+
+
+            imageAnalyzer!!.setAnalyzer(mainExecutor, QRAnalyzer(rotation, config.options).apply {
+                onFrameAnalyzed { qrStatus, barcode, barcodes, exeption ->
+                    if(qrStatus == QRStatus.Success){
+                        qrReaderListener.onRead(barcode!!, barcodes!!)
+                    }else if(qrStatus == QRStatus.Error){
+                        qrReaderListener.onError(exeption!!)
+                    }
                 }
-            }
-        }
-        //End - ImageAnalyze
+            })
+            //End - ImageAnalyze
+
+            cameraProvider.unbindAll()
+            camera = cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalyzer)
+
+        }, mainExecutor)
     }
 
-    fun startCamera(lifecycleOwner: LifecycleOwner, conf: QRCameraConfiguration = QRCameraConfiguration()) {
+    fun startCamera(lifecycleowner: LifecycleOwner, conf: QRCameraConfiguration = QRCameraConfiguration()) {
         val permissionCamera = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
         if (permissionCamera == PackageManager.PERMISSION_GRANTED) {
             this@QRReaderView.post {
 
+                lifecycleOwner = lifecycleowner
                 config = conf
 
-                CameraX.unbindAll()
+                cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+                cameraProvider = cameraProviderFuture.get()
+                mainExecutor = ContextCompat.getMainExecutor(context)
+
                 buildUseCases()
-                CameraX.bindToLifecycle(
-                    lifecycleOwner,
-                    preview,
-                    imageAnalyzer
-                )
+
             }
         } else {
             throw Exception("Camera permission not granted")
@@ -95,10 +105,14 @@ class QRReaderView @JvmOverloads constructor(
     }
 
     fun enableTorch(enableTorch: Boolean) {
-        preview?.enableTorch(enableTorch)
+        camera?.cameraControl?.enableTorch(enableTorch)
     }
 
-    fun isTorchOn(): Boolean {
-        return preview?.isTorchOn ?: false
+    fun isTorchOn(): LiveData<Int>? {
+        return camera?.cameraInfo?.torchState
+    }
+
+    fun isTorchAvailable() : Boolean{
+        return camera?.cameraInfo?.hasFlashUnit() == true
     }
 }

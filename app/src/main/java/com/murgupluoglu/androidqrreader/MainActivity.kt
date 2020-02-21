@@ -3,11 +3,13 @@ package com.murgupluoglu.androidqrreader
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.CameraX
+import androidx.camera.core.CameraSelector
 import com.blankj.utilcode.constant.PermissionConstants
 import com.blankj.utilcode.util.PermissionUtils
 import com.blankj.utilcode.util.Utils
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
 import com.murgupluoglu.qrreader.QRCameraConfiguration
+import com.murgupluoglu.qrreader.QRReaderListener
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -18,16 +20,21 @@ class MainActivity : AppCompatActivity() {
 
         Utils.init(this@MainActivity)
 
-        qrCodeReaderView.setListener { qrCode, status ->
-            qrTextView.text = qrCode
-        }
+
+        qrCodeReaderView.setListener(object : QRReaderListener{
+            override fun onRead(barcode: FirebaseVisionBarcode, barcodes: List<FirebaseVisionBarcode>) {
+                qrTextView.text = barcode.displayValue
+            }
+
+            override fun onError(exception: Exception) {
+                qrTextView.text = exception.toString()
+            }
+        })
 
         PermissionUtils.permission(PermissionConstants.CAMERA).callback(object : PermissionUtils.SimpleCallback {
             override fun onGranted() {
-                qrCodeReaderView.startCamera(
-                    this@MainActivity,
-                    QRCameraConfiguration(lensFacing = CameraX.LensFacing.BACK)
-                )
+                val config = QRCameraConfiguration(lensFacing = CameraSelector.LENS_FACING_FRONT)
+                qrCodeReaderView.startCamera(this@MainActivity, config)
             }
 
             override fun onDenied() {
@@ -37,7 +44,7 @@ class MainActivity : AppCompatActivity() {
 
 
         torchButton.setOnClickListener {
-            qrCodeReaderView.enableTorch(!qrCodeReaderView.isTorchOn())
+            qrCodeReaderView.enableTorch(true)
         }
     }
 }

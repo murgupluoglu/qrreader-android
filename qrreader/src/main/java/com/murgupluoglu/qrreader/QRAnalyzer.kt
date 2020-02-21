@@ -1,67 +1,60 @@
 package com.murgupluoglu.qrreader
 
-import android.util.Log
+import android.annotation.SuppressLint
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
-import com.google.zxing.*
-import com.google.zxing.common.HybridBinarizer
-import com.google.zxing.qrcode.QRCodeReader
+import com.google.firebase.ml.vision.FirebaseVision
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
+import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions
+import com.google.firebase.ml.vision.common.FirebaseVisionImage
+import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
+import java.lang.Exception
+
 
 /*
 *  Created by Mustafa Ürgüplüoğlu on 05.07.2019.
 *  Copyright © 2019 Mustafa Ürgüplüoğlu. All rights reserved.
 */
 
-class QRAnalyzer : ImageAnalysis.Analyzer {
+class QRAnalyzer(val displayRotation : Int, val options: FirebaseVisionBarcodeDetectorOptions) : ImageAnalysis.Analyzer {
 
-    var qrCodeReader: QRCodeReader = QRCodeReader()
-    private val listeners = ArrayList<(qrCode: String, qrStatus : QRStatus, resultPoint : Array<ResultPoint>?, resultImageWidth : Int?, resultImageHeight : Int?, rotationDegrees: Int) -> Unit>()
+    private fun degreesToFirebaseRotation(degrees: Int): Int {
+        return when (degrees) {
+            0 -> FirebaseVisionImageMetadata.ROTATION_0
+            90 -> FirebaseVisionImageMetadata.ROTATION_90
+            180 -> FirebaseVisionImageMetadata.ROTATION_180
+            270 -> FirebaseVisionImageMetadata.ROTATION_270
+            else -> throw IllegalArgumentException("Rotation must be 0, 90, 180, or 270.")
+        }
+    }
+
+    private val listeners = ArrayList<(qrStatus: Int, barcode : FirebaseVisionBarcode?, barcodes : List<FirebaseVisionBarcode>?, exeption : Exception?) -> Unit>()
 
 
-    fun onFrameAnalyzed(listener: (qrCode: String, qrStatus : QRStatus, resultPoint : Array<ResultPoint>?, resultImageWidth : Int?, resultImageHeight : Int?, rotationDegrees: Int) -> Unit) = listeners.add(listener)
+    fun onFrameAnalyzed(listener: (qrStatus: Int, barcode : FirebaseVisionBarcode?, barcodes : List<FirebaseVisionBarcode>?, exeption : Exception?) -> Unit) = listeners.add(listener)
 
-
-    override fun analyze(image: ImageProxy, rotationDegrees: Int) {
-
+    @SuppressLint("UnsafeExperimentalUsageError")
+    override fun analyze(imageProxy: ImageProxy) {
         if (listeners.isEmpty()) return
 
-        val y = image.planes[0]
-        val u = image.planes[1]
-        val v = image.planes[2]
+        imageProxy.image?.let { image ->
+            val visionImage = FirebaseVisionImage.fromMediaImage(image, degreesToFirebaseRotation(displayRotation))
 
-        val Yb = y.buffer.remaining()
-        val Ub = u.buffer.remaining()
-        val Vb = v.buffer.remaining()
+            val detector = FirebaseVision.getInstance().getVisionBarcodeDetector(options)
 
-        val data = ByteArray(Yb + Ub + Vb)
-        y.buffer.get(data, 0, Yb)
-        u.buffer.get(data, Yb, Ub)
-        v.buffer.get(data, Yb + Ub, Vb)
+            detector.detectInImage(visionImage)
+                    .addOnSuccessListener { barcodes ->
 
-        val lum = PlanarYUVLuminanceSource(
-            data,
-            image.width, image.height,
-            0, 0,
-            image.width, image.height,
-            false
-        )
-        val hybBin = HybridBinarizer(lum)
-        val bitmap = BinaryBitmap(hybBin)
+                        if(barcodes.isNotEmpty()){
+                            listeners.forEach { it(QRStatus.Success, barcodes[0], barcodes, null) }
+                        }
 
-        try {
-            val result = qrCodeReader.decode(bitmap, null)
-            val points = result.resultPoints
-            listeners.forEach { it(result.text.toString(), QRStatus.Success(), points, image.width, image.height, rotationDegrees) }
-        } catch (e: NotFoundException) {
-            listeners.forEach { it("", QRStatus.NotFoundException(), null, null,null, rotationDegrees) }
-        } catch (e: ChecksumException) {
-            Log.d("ChecksumException", e.toString())
-            listeners.forEach { it("", QRStatus.ChecksumException(), null, null, null, rotationDegrees) }
-        } catch (e: FormatException) {
-            Log.d("FormatException", e.toString())
-            listeners.forEach { it("", QRStatus.FormatException(), null, null, null, rotationDegrees) }
-        } finally {
-            qrCodeReader.reset()
+                        imageProxy.close()
+                    }
+                    .addOnFailureListener { error ->
+                        listeners.forEach { it(QRStatus.Error, null, null, error) }
+                        imageProxy.close()
+                    }
         }
     }
 }
