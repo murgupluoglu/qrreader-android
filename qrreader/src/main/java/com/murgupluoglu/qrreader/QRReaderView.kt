@@ -48,17 +48,6 @@ class QRReaderView @JvmOverloads constructor(
 
             val rotation = display.rotation
 
-
-            //Preview
-            preview = Preview.Builder()
-                    .setTargetName("Preview")
-                    .setTargetAspectRatio(AspectRatio.RATIO_16_9)
-                    .setTargetRotation(rotation)
-                    .build()
-
-            preview!!.setSurfaceProvider(previewSurfaceProvider)
-            //End - Preview
-
             //ImageAnalyze
             imageAnalyzer = ImageAnalysis.Builder()
                     .setTargetName("Analysis")
@@ -78,8 +67,16 @@ class QRReaderView @JvmOverloads constructor(
             })
             //End - ImageAnalyze
 
+            preview = Preview.Builder()
+                    .setTargetName("Preview")
+                    .setTargetAspectRatio(AspectRatio.RATIO_16_9)
+                    .setTargetRotation(rotation)
+                    .build()
+
             cameraProvider.unbindAll()
             camera = cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalyzer)
+
+            preview!!.setSurfaceProvider(createSurfaceProvider(camera!!.cameraInfo))
 
         }, mainExecutor)
     }
@@ -108,7 +105,14 @@ class QRReaderView @JvmOverloads constructor(
         camera?.cameraControl?.enableTorch(enableTorch)
     }
 
-    fun isTorchOn(): LiveData<Int>? {
+    fun isTorchOn(): Boolean {
+        if(isTorchAvailable()){
+            return camera?.cameraInfo?.torchState?.value == 1
+        }
+        return false
+    }
+
+    fun isTorchOnLiveData(): LiveData<Int>? {
         return camera?.cameraInfo?.torchState
     }
 

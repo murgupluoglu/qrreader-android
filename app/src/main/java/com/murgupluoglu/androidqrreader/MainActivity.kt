@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Utils.init(this@MainActivity)
+        Utils.init(application)
 
 
         qrCodeReaderView.setListener(object : QRReaderListener{
@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
 
         PermissionUtils.permission(PermissionConstants.CAMERA).callback(object : PermissionUtils.SimpleCallback {
             override fun onGranted() {
-                val config = QRCameraConfiguration(lensFacing = CameraSelector.LENS_FACING_FRONT)
+                val config = QRCameraConfiguration(lensFacing = CameraSelector.LENS_FACING_BACK)
                 qrCodeReaderView.startCamera(this@MainActivity, config)
             }
 
@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
 
 
         torchButton.setOnClickListener {
-            qrCodeReaderView.enableTorch(true)
+            qrCodeReaderView.enableTorch(!qrCodeReaderView.isTorchOn())
         }
     }
 }
