@@ -81,13 +81,13 @@ class QRReaderView @JvmOverloads constructor(
         }, mainExecutor)
     }
 
-    fun startCamera(lifecycleowner: LifecycleOwner, conf: QRCameraConfiguration = QRCameraConfiguration()) {
+    fun startCamera(lifecycleOwner: LifecycleOwner, config: QRCameraConfiguration = QRCameraConfiguration()) {
         val permissionCamera = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
         if (permissionCamera == PackageManager.PERMISSION_GRANTED) {
             this@QRReaderView.post {
 
-                lifecycleOwner = lifecycleowner
-                config = conf
+                this.lifecycleOwner = lifecycleOwner
+                this.config = config
 
                 cameraProviderFuture = ProcessCameraProvider.getInstance(context)
                 cameraProvider = cameraProviderFuture.get()
