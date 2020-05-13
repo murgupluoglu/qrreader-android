@@ -25,9 +25,11 @@ allprojects {
 
 Add this to your app `build.gradle`:
 
+[![](https://jitpack.io/v/murgupluoglu/qrreader-android.svg)](https://jitpack.io/#murgupluoglu/qrreader-android)
+
 ```groovy
 dependencies {
-	implementation 'com.github.murgupluoglu:qrreader-android:2.0.0'
+	implementation 'com.github.murgupluoglu:qrreader-android:lastVersion'
 }
 ```
 
