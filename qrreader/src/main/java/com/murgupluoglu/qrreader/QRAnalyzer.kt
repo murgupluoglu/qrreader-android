@@ -8,7 +8,6 @@ import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOptions
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
-import java.lang.Exception
 
 
 /*
@@ -16,7 +15,7 @@ import java.lang.Exception
 *  Copyright © 2019 Mustafa Ürgüplüoğlu. All rights reserved.
 */
 
-class QRAnalyzer(val displayRotation : Int, val options: FirebaseVisionBarcodeDetectorOptions) : ImageAnalysis.Analyzer {
+class QRAnalyzer(val displayRotation: Int, val options: FirebaseVisionBarcodeDetectorOptions) : ImageAnalysis.Analyzer {
 
     private fun degreesToFirebaseRotation(degrees: Int): Int {
         return when (degrees) {
@@ -28,10 +27,10 @@ class QRAnalyzer(val displayRotation : Int, val options: FirebaseVisionBarcodeDe
         }
     }
 
-    private val listeners = ArrayList<(qrStatus: Int, barcode : FirebaseVisionBarcode?, barcodes : List<FirebaseVisionBarcode>?, exeption : Exception?) -> Unit>()
+    private val listeners = ArrayList<(qrStatus: Int, barcode: FirebaseVisionBarcode?, barcodes: List<FirebaseVisionBarcode>?, exeption: Exception?) -> Unit>()
 
 
-    fun onFrameAnalyzed(listener: (qrStatus: Int, barcode : FirebaseVisionBarcode?, barcodes : List<FirebaseVisionBarcode>?, exeption : Exception?) -> Unit) = listeners.add(listener)
+    fun onFrameAnalyzed(listener: (qrStatus: Int, barcode: FirebaseVisionBarcode?, barcodes: List<FirebaseVisionBarcode>?, exeption: Exception?) -> Unit) = listeners.add(listener)
 
     @SuppressLint("UnsafeExperimentalUsageError")
     override fun analyze(imageProxy: ImageProxy) {
@@ -45,7 +44,7 @@ class QRAnalyzer(val displayRotation : Int, val options: FirebaseVisionBarcodeDe
             detector.detectInImage(visionImage)
                     .addOnSuccessListener { barcodes ->
 
-                        if(barcodes.isNotEmpty()){
+                        if (barcodes.isNotEmpty()) {
                             listeners.forEach { it(QRStatus.Success, barcodes[0], barcodes, null) }
                         }
 

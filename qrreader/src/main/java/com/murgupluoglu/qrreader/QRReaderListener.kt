@@ -7,7 +7,7 @@ import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
 *  Copyright © 2019 Mustafa Ürgüplüoğlu. All rights reserved.
 */
 
-interface QRReaderListener{
+interface QRReaderListener {
     fun onRead(barcode: FirebaseVisionBarcode, barcodes: List<FirebaseVisionBarcode>)
     fun onError(exception: Exception)
 }

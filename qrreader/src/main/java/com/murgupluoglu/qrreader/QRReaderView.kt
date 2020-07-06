@@ -20,7 +20,7 @@ import java.util.concurrent.Executor
 */
 
 class QRReaderView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+        context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : PreviewView(context, attrs, defStyleAttr) {
 
     private lateinit var config: QRCameraConfiguration
@@ -28,14 +28,14 @@ class QRReaderView @JvmOverloads constructor(
     private var imageAnalyzer: ImageAnalysis? = null
     private lateinit var mainExecutor: Executor
     private lateinit var cameraProvider: ProcessCameraProvider
-    private lateinit var cameraSelector : CameraSelector
-    private lateinit var cameraProviderFuture : ListenableFuture<ProcessCameraProvider>
-    private lateinit var lifecycleOwner : LifecycleOwner
-    private var camera : Camera? = null
+    private lateinit var cameraSelector: CameraSelector
+    private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
+    private lateinit var lifecycleOwner: LifecycleOwner
+    private var camera: Camera? = null
 
     private lateinit var qrReaderListener: QRReaderListener
 
-    fun setListener(listener : QRReaderListener) {
+    fun setListener(listener: QRReaderListener) {
         qrReaderListener = listener
     }
 
@@ -58,9 +58,9 @@ class QRReaderView @JvmOverloads constructor(
 
             imageAnalyzer!!.setAnalyzer(mainExecutor, QRAnalyzer(rotation, config.options).apply {
                 onFrameAnalyzed { qrStatus, barcode, barcodes, exeption ->
-                    if(qrStatus == QRStatus.Success){
+                    if (qrStatus == QRStatus.Success) {
                         qrReaderListener.onRead(barcode!!, barcodes!!)
-                    }else if(qrStatus == QRStatus.Error){
+                    } else if (qrStatus == QRStatus.Error) {
                         qrReaderListener.onError(exeption!!)
                     }
                 }
@@ -106,7 +106,7 @@ class QRReaderView @JvmOverloads constructor(
     }
 
     fun isTorchOn(): Boolean {
-        if(isTorchAvailable()){
+        if (isTorchAvailable()) {
             return camera?.cameraInfo?.torchState?.value == 1
         }
         return false
@@ -116,7 +116,7 @@ class QRReaderView @JvmOverloads constructor(
         return camera?.cameraInfo?.torchState
     }
 
-    fun isTorchAvailable() : Boolean{
+    fun isTorchAvailable(): Boolean {
         return camera?.cameraInfo?.hasFlashUnit() == true
     }
 }

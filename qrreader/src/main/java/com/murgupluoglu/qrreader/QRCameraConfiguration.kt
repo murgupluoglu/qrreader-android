@@ -16,5 +16,5 @@ data class QRCameraConfiguration(
                 FirebaseVisionBarcodeDetectorOptions.Builder().setBarcodeFormats(
                         FirebaseVisionBarcode.FORMAT_QR_CODE,
                         FirebaseVisionBarcode.FORMAT_AZTEC)
-                .build()
+                        .build()
 )

@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         Utils.init(application)
 
 
-        qrCodeReaderView.setListener(object : QRReaderListener{
+        qrCodeReaderView.setListener(object : QRReaderListener {
             override fun onRead(barcode: FirebaseVisionBarcode, barcodes: List<FirebaseVisionBarcode>) {
                 qrTextView.text = barcode.displayValue
             }
