@@ -76,7 +76,7 @@ class QRReaderView @JvmOverloads constructor(
             cameraProvider.unbindAll()
             camera = cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalyzer)
 
-            preview!!.setSurfaceProvider(createSurfaceProvider(camera!!.cameraInfo))
+            preview!!.setSurfaceProvider(createSurfaceProvider())
 
         }, mainExecutor)
     }
