@@ -6,7 +6,7 @@
 ![Preview](https://github.com/murgupluoglu/qrreader-android/blob/master/github/sample.gif)
 ## Setup
 
-You must setup Firebase for use this library at your application. 
+You must setup Firebase for use this library in your application. 
 [Firebase Android Setup](https://firebase.google.com/docs/android/setup)
 
 ### Gradle
