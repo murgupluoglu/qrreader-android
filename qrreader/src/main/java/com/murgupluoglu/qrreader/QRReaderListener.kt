@@ -1,6 +1,6 @@
 package com.murgupluoglu.qrreader
 
-import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
+import com.google.mlkit.vision.barcode.Barcode
 
 /*
 *  Created by Mustafa Ürgüplüoğlu on 05.07.2019.
@@ -8,6 +8,6 @@ import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
 */
 
 interface QRReaderListener {
-    fun onRead(barcode: FirebaseVisionBarcode, barcodes: List<FirebaseVisionBarcode>)
+    fun onRead(barcode: Barcode, barcodes: List<Barcode>)
     fun onError(exception: Exception)
 }

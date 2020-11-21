@@ -1,16 +1,19 @@
 package com.murgupluoglu.qrreader
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
-import android.util.AttributeSet
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import com.google.common.util.concurrent.ListenableFuture
+import kotlinx.android.synthetic.main.fragment_qrreader.*
 import java.util.concurrent.Executor
 
 
@@ -19,9 +22,7 @@ import java.util.concurrent.Executor
 *  Copyright © 2019 Mustafa Ürgüplüoğlu. All rights reserved.
 */
 
-class QRReaderView @JvmOverloads constructor(
-        context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : PreviewView(context, attrs, defStyleAttr) {
+class QRReaderFragment : Fragment() {
 
     private lateinit var config: QRCameraConfiguration
     private var preview: Preview? = null
@@ -35,18 +36,24 @@ class QRReaderView @JvmOverloads constructor(
 
     private lateinit var qrReaderListener: QRReaderListener
 
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?): View? =
+            inflater.inflate(R.layout.fragment_qrreader, container, false)
+
     fun setListener(listener: QRReaderListener) {
         qrReaderListener = listener
     }
 
     private fun buildUseCases() {
 
-        cameraProviderFuture.addListener(Runnable {
+        cameraProviderFuture.addListener({
 
             cameraSelector = CameraSelector.Builder().requireLensFacing(config.lensFacing).build()
 
 
-            val rotation = display.rotation
+            val rotation = previewView.display.rotation
 
             //ImageAnalyze
             imageAnalyzer = ImageAnalysis.Builder()
@@ -56,12 +63,12 @@ class QRReaderView @JvmOverloads constructor(
                     .build()
 
 
-            imageAnalyzer!!.setAnalyzer(mainExecutor, QRAnalyzer(rotation, config.options).apply {
-                onFrameAnalyzed { qrStatus, barcode, barcodes, exeption ->
+            imageAnalyzer!!.setAnalyzer(mainExecutor, QRAnalyzer(config.options).apply {
+                onFrameAnalyzed { qrStatus, barcode, barcodes, exception ->
                     if (qrStatus == QRStatus.Success) {
                         qrReaderListener.onRead(barcode!!, barcodes!!)
                     } else if (qrStatus == QRStatus.Error) {
-                        qrReaderListener.onError(exeption!!)
+                        qrReaderListener.onError(exception!!)
                     }
                 }
             })
@@ -76,22 +83,22 @@ class QRReaderView @JvmOverloads constructor(
             cameraProvider.unbindAll()
             camera = cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalyzer)
 
-            preview!!.setSurfaceProvider(createSurfaceProvider())
+            preview!!.setSurfaceProvider(previewView.surfaceProvider)
 
         }, mainExecutor)
     }
 
     fun startCamera(lifecycleOwner: LifecycleOwner, config: QRCameraConfiguration = QRCameraConfiguration()) {
-        val permissionCamera = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+        val permissionCamera = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
         if (permissionCamera == PackageManager.PERMISSION_GRANTED) {
-            this@QRReaderView.post {
+            previewView.post {
 
                 this.lifecycleOwner = lifecycleOwner
                 this.config = config
 
-                cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+                cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
                 cameraProvider = cameraProviderFuture.get()
-                mainExecutor = ContextCompat.getMainExecutor(context)
+                mainExecutor = ContextCompat.getMainExecutor(requireContext())
 
                 buildUseCases()
 

@@ -6,9 +6,10 @@
     android:background="@android:color/holo_blue_bright"
     android:orientation="vertical">
 
-    <com.murgupluoglu.qrreader.QRReaderView
-        android:id="@+id/qrCodeReaderView"
+    <fragment
+        android:id="@+id/qrCodeReaderFragment"
         android:layout_width="0dp"
+        android:name="com.murgupluoglu.qrreader.QRReaderFragment"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -30,6 +31,7 @@
         android:background="#FFFFFF"
         android:gravity="center"
         android:padding="5dp"
+        android:autoLink="all"
         android:text="QR Code : "
         android:textColor="#000000"
         app:layout_constraintBottom_toBottomOf="@+id/cameraBottomView"

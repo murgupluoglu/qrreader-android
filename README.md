@@ -43,32 +43,46 @@ This library using Camera permission. Please grant permission before start.
 
 #### Step 1
 
-Add QRReaderView to your XML like any other view.
+Add QRReaderFragment to your XML like any other fragment.
 
 ```xml
-<androidx.constraintlayout.widget.ConstraintLayout 
-  android:layout_width="match_parent"  
-  android:layout_height="match_parent"  
-  android:orientation="vertical">  
-  
- <com.murgupluoglu.qrreader.QRReaderView  
-  android:id="@+id/qrCodeReaderView"  
-  android:layout_width="0dp"  
-  android:layout_height="0dp" />
+<androidx.constraintlayout.widget.ConstraintLayout
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical">
+
+    <fragment
+        android:id="@+id/qrCodeReaderFragment"
+        android:layout_width="0dp"
+        android:name="com.murgupluoglu.qrreader.QRReaderFragment"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
 ```
 
 #### Step 2
+Define your fragment for access later
+```kotlin
+val qrCodeReader : QRReaderFragment by lazy {
+    qrCodeReaderFragment as QRReaderFragment
+}
+```
+
+#### Step 3
 Add listener for returned qr code.
 ```kotlin
-qrCodeReaderView.setListener(object : QRReaderListener{  
-    override fun onRead(barcode: FirebaseVisionBarcode, barcodes: List<FirebaseVisionBarcode>) {  
-        
-  }  
-  
-    override fun onError(exception: Exception) {  
-        
-    }  
+qrCodeReaderView.setListener(object : QRReaderListener{
+    override fun onRead(barcode: FirebaseVisionBarcode, barcodes: List<FirebaseVisionBarcode>) {
+
+  }
+
+    override fun onError(exception: Exception) {
+
+    }
 })
 ```
 #### Step 3
@@ -80,12 +94,12 @@ qrCodeReaderView.startCamera(this@MainActivity)
 #### Optional
 Set configuration and enable torch
 ```kotlin
-val firebaseOptions =  
-        FirebaseVisionBarcodeDetectorOptions.Builder().setBarcodeFormats(  
-                FirebaseVisionBarcode.FORMAT_QR_CODE,  
-                FirebaseVisionBarcode.FORMAT_AZTEC)  
-                .build()  
-val config = QRCameraConfiguration(lensFacing = CameraSelector.LENS_FACING_FRONT, options = firebaseOptions)
+val qrOptions: BarcodeScannerOptions = BarcodeScannerOptions.Builder()
+    .setBarcodeFormats(
+        Barcode.FORMAT_QR_CODE,
+        Barcode.FORMAT_AZTEC)
+    .build()
+val config = QRCameraConfiguration(lensFacing = CameraSelector.LENS_FACING_FRONT, options = qrOptions)
 
 qrCodeReaderView.startCamera(this@MainActivity, config)
 
