@@ -4,6 +4,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import com.blankj.utilcode.constant.PermissionConstants
@@ -11,22 +13,25 @@ import com.blankj.utilcode.util.PermissionUtils
 import com.blankj.utilcode.util.Utils
 import com.google.mlkit.vision.barcode.Barcode
 import com.murgupluoglu.qrreader.QRCameraConfiguration
-import com.murgupluoglu.qrreader.QRReaderListener
 import com.murgupluoglu.qrreader.QRReaderFragment
-import kotlinx.android.synthetic.main.activity_main.*
+import com.murgupluoglu.qrreader.QRReaderListener
 
 
 class MainActivity : AppCompatActivity() {
 
-    val qrCodeReader : QRReaderFragment by lazy {
-        qrCodeReaderFragment as QRReaderFragment
-    }
+    private lateinit var qrCodeReader: QRReaderFragment
+    private lateinit var qrTextView: TextView
+    private lateinit var torchButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         Utils.init(application)
+
+        qrCodeReader = supportFragmentManager.findFragmentById(R.id.qrCodeReaderFragment) as QRReaderFragment
+        qrTextView = findViewById(R.id.qrTextView)
+        torchButton = findViewById(R.id.torchButton)
 
 
         qrCodeReader.setListener(object : QRReaderListener {
@@ -56,7 +61,7 @@ class MainActivity : AppCompatActivity() {
             qrCodeReader.enableTorch(!qrCodeReader.isTorchOn())
         }
 
-        qrTextView?.setOnClickListener {
+        qrTextView.setOnClickListener {
             val uriUrl: Uri = Uri.parse(qrTextView.text.toString())
             val launchBrowser = Intent(Intent.ACTION_VIEW, uriUrl)
             startActivity(launchBrowser)

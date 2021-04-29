@@ -20,7 +20,7 @@ class QRAnalyzer(val options: BarcodeScannerOptions) : ImageAnalysis.Analyzer {
 
     fun onFrameAnalyzed(listener: (qrStatus: Int, barcode: Barcode?, barcodes: List<Barcode>?, exception: Exception?) -> Unit) = listeners.add(listener)
 
-    @SuppressLint("UnsafeExperimentalUsageError")
+    @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
     override fun analyze(imageProxy: ImageProxy) {
         if (listeners.isEmpty()) return
 

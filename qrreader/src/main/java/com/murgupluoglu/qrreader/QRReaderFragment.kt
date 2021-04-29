@@ -8,12 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import com.google.common.util.concurrent.ListenableFuture
-import kotlinx.android.synthetic.main.fragment_qrreader.*
 import java.util.concurrent.Executor
 
 
@@ -36,11 +36,16 @@ class QRReaderFragment : Fragment() {
 
     private lateinit var qrReaderListener: QRReaderListener
 
+    private lateinit var previewView: PreviewView
+
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
-            savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_qrreader, container, false)
+            savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_qrreader, container, false)
+        previewView = view.findViewById(R.id.previewView)
+        return view
+    }
 
     fun setListener(listener: QRReaderListener) {
         qrReaderListener = listener
