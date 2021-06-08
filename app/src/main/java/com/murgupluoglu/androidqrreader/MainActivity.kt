@@ -29,7 +29,8 @@ class MainActivity : AppCompatActivity() {
 
         Utils.init(application)
 
-        qrCodeReader = supportFragmentManager.findFragmentById(R.id.qrCodeReaderFragment) as QRReaderFragment
+        qrCodeReader =
+            supportFragmentManager.findFragmentById(R.id.qrCodeReaderFragment) as QRReaderFragment
         qrTextView = findViewById(R.id.qrTextView)
         torchButton = findViewById(R.id.torchButton)
 
@@ -45,16 +46,20 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        PermissionUtils.permission(PermissionConstants.CAMERA).callback(object : PermissionUtils.SimpleCallback {
-            override fun onGranted() {
-                val config = QRCameraConfiguration(lensFacing = CameraSelector.LENS_FACING_BACK)
-                qrCodeReader.startCamera(this@MainActivity, config)
-            }
+        PermissionUtils.permission(PermissionConstants.CAMERA)
+            .callback(object : PermissionUtils.SimpleCallback {
+                override fun onGranted() {
+                    val config = QRCameraConfiguration(lensFacing = CameraSelector.LENS_FACING_BACK)
+                    qrCodeReader.startCamera(this@MainActivity, config)
+                }
 
-            override fun onDenied() {
-                Log.e("MainActivity", "The camera permission must be granted in order to use this app")
-            }
-        }).request()
+                override fun onDenied() {
+                    Log.e(
+                        "MainActivity",
+                        "The camera permission must be granted in order to use this app"
+                    )
+                }
+            }).request()
 
 
         torchButton.setOnClickListener {
