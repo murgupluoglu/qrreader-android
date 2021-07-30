@@ -2,10 +2,6 @@ package com.murgupluoglu.qrreader
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -22,7 +18,7 @@ import java.util.concurrent.Executor
 *  Copyright © 2019 Mustafa Ürgüplüoğlu. All rights reserved.
 */
 
-class QRReaderFragment : Fragment() {
+class QRReaderFragment : Fragment(R.layout.fragment_qrreader) {
 
     private lateinit var config: QRCameraConfiguration
     private var preview: Preview? = null
@@ -36,15 +32,8 @@ class QRReaderFragment : Fragment() {
 
     private lateinit var qrReaderListener: QRReaderListener
 
-    private lateinit var previewView: PreviewView
-
-    override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_qrreader, container, false)
-        previewView = view.findViewById(R.id.previewView)
-        return view
+    private val previewView: PreviewView by lazy {
+        requireView().findViewById(R.id.previewView)
     }
 
     fun setListener(listener: QRReaderListener) {
@@ -62,10 +51,10 @@ class QRReaderFragment : Fragment() {
 
             //ImageAnalyze
             imageAnalyzer = ImageAnalysis.Builder()
-                    .setTargetName("Analysis")
-                    .setTargetAspectRatio(AspectRatio.RATIO_16_9)
-                    .setTargetRotation(rotation)
-                    .build()
+                .setTargetName("Analysis")
+                .setTargetAspectRatio(AspectRatio.RATIO_16_9)
+                .setTargetRotation(rotation)
+                .build()
 
 
             imageAnalyzer!!.setAnalyzer(mainExecutor, QRAnalyzer(config.options).apply {
@@ -80,21 +69,30 @@ class QRReaderFragment : Fragment() {
             //End - ImageAnalyze
 
             preview = Preview.Builder()
-                    .setTargetName("Preview")
-                    .setTargetAspectRatio(AspectRatio.RATIO_16_9)
-                    .setTargetRotation(rotation)
-                    .build()
+                .setTargetName("Preview")
+                .setTargetAspectRatio(AspectRatio.RATIO_16_9)
+                .setTargetRotation(rotation)
+                .build()
 
             cameraProvider.unbindAll()
-            camera = cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalyzer)
+            camera = cameraProvider.bindToLifecycle(
+                lifecycleOwner,
+                cameraSelector,
+                preview,
+                imageAnalyzer
+            )
 
             preview!!.setSurfaceProvider(previewView.surfaceProvider)
 
         }, mainExecutor)
     }
 
-    fun startCamera(lifecycleOwner: LifecycleOwner, config: QRCameraConfiguration = QRCameraConfiguration()) {
-        val permissionCamera = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
+    fun startCamera(
+        lifecycleOwner: LifecycleOwner,
+        config: QRCameraConfiguration = QRCameraConfiguration()
+    ) {
+        val permissionCamera =
+            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
         if (permissionCamera == PackageManager.PERMISSION_GRANTED) {
             previewView.post {
 

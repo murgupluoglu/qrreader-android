@@ -16,9 +16,11 @@ import com.google.mlkit.vision.common.InputImage
 
 class QRAnalyzer(val options: BarcodeScannerOptions) : ImageAnalysis.Analyzer {
 
-    private val listeners = ArrayList<(qrStatus: Int, barcode: Barcode?, barcodes: List<Barcode>?, exception: Exception?) -> Unit>()
+    private val listeners =
+        ArrayList<(qrStatus: Int, barcode: Barcode?, barcodes: List<Barcode>?, exception: Exception?) -> Unit>()
 
-    fun onFrameAnalyzed(listener: (qrStatus: Int, barcode: Barcode?, barcodes: List<Barcode>?, exception: Exception?) -> Unit) = listeners.add(listener)
+    fun onFrameAnalyzed(listener: (qrStatus: Int, barcode: Barcode?, barcodes: List<Barcode>?, exception: Exception?) -> Unit) =
+        listeners.add(listener)
 
     @SuppressLint("UnsafeExperimentalUsageError", "UnsafeOptInUsageError")
     override fun analyze(imageProxy: ImageProxy) {
@@ -30,16 +32,16 @@ class QRAnalyzer(val options: BarcodeScannerOptions) : ImageAnalysis.Analyzer {
             val detector = BarcodeScanning.getClient(options)
 
             detector.process(visionImage)
-                    .addOnSuccessListener { barcodes ->
-                        if (barcodes.isNotEmpty()) {
-                            listeners.forEach { it(QRStatus.Success, barcodes[0], barcodes, null) }
-                        }
-                        imageProxy.close()
+                .addOnSuccessListener { barcodes ->
+                    if (barcodes.isNotEmpty()) {
+                        listeners.forEach { it(QRStatus.Success, barcodes[0], barcodes, null) }
                     }
-                    .addOnFailureListener { error ->
-                        listeners.forEach { it(QRStatus.Error, null, null, error) }
-                        imageProxy.close()
-                    }
+                    imageProxy.close()
+                }
+                .addOnFailureListener { error ->
+                    listeners.forEach { it(QRStatus.Error, null, null, error) }
+                    imageProxy.close()
+                }
         }
     }
 }

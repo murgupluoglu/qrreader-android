@@ -10,11 +10,12 @@ import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 */
 
 data class QRCameraConfiguration(
-        var lensFacing: Int = CameraSelector.LENS_FACING_BACK,
+    var lensFacing: Int = CameraSelector.LENS_FACING_BACK,
 
-        val options: BarcodeScannerOptions = BarcodeScannerOptions.Builder()
-                .setBarcodeFormats(
-                        Barcode.FORMAT_QR_CODE,
-                        Barcode.FORMAT_AZTEC)
-                .build()
+    val options: BarcodeScannerOptions = BarcodeScannerOptions.Builder()
+        .setBarcodeFormats(
+            Barcode.FORMAT_QR_CODE,
+            Barcode.FORMAT_AZTEC
+        )
+        .build()
 )
