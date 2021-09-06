@@ -31,12 +31,12 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
     api 'androidx.appcompat:appcompat:1.3.1'
-    api 'androidx.constraintlayout:constraintlayout:2.0.4'
+    api 'androidx.constraintlayout:constraintlayout:2.1.0'
 
-    api 'androidx.camera:camera-core:1.1.0-alpha07'
-    api 'androidx.camera:camera-camera2:1.1.0-alpha07'
-    api 'androidx.camera:camera-lifecycle:1.1.0-alpha07'
-    api 'androidx.camera:camera-view:1.0.0-alpha27'
+    api 'androidx.camera:camera-core:1.1.0-alpha08'
+    api 'androidx.camera:camera-camera2:1.1.0-alpha08'
+    api 'androidx.camera:camera-lifecycle:1.1.0-alpha08'
+    api 'androidx.camera:camera-view:1.0.0-alpha28'
 
-    api 'com.google.mlkit:barcode-scanning:16.2.0'
+    api 'com.google.mlkit:barcode-scanning:17.0.0'
 }

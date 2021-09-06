@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
@@ -22,6 +23,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var qrCodeReader: QRReaderFragment
     private lateinit var qrTextView: TextView
     private lateinit var torchButton: Button
+    private lateinit var switchCamera: ImageButton
+    private val config = QRCameraConfiguration(lensFacing = CameraSelector.LENS_FACING_BACK)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +36,7 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.findFragmentById(R.id.qrCodeReaderFragment) as QRReaderFragment
         qrTextView = findViewById(R.id.qrTextView)
         torchButton = findViewById(R.id.torchButton)
+        switchCamera = findViewById(R.id.switchCamera)
 
 
         qrCodeReader.setListener(object : QRReaderListener {
@@ -49,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         PermissionUtils.permission(PermissionConstants.CAMERA)
             .callback(object : PermissionUtils.SimpleCallback {
                 override fun onGranted() {
-                    val config = QRCameraConfiguration(lensFacing = CameraSelector.LENS_FACING_BACK)
+
                     qrCodeReader.startCamera(this@MainActivity, config)
                 }
 
@@ -70,6 +74,15 @@ class MainActivity : AppCompatActivity() {
             val uriUrl: Uri = Uri.parse(qrTextView.text.toString())
             val launchBrowser = Intent(Intent.ACTION_VIEW, uriUrl)
             startActivity(launchBrowser)
+        }
+
+        switchCamera.setOnClickListener {
+            if (config.lensFacing == CameraSelector.LENS_FACING_BACK) {
+                config.lensFacing = CameraSelector.LENS_FACING_FRONT
+            } else {
+                config.lensFacing = CameraSelector.LENS_FACING_BACK
+            }
+            qrCodeReader.startCamera(this@MainActivity, config)
         }
     }
 }
