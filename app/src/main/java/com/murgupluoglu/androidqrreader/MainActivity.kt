@@ -12,7 +12,7 @@ import androidx.camera.core.CameraSelector
 import com.blankj.utilcode.constant.PermissionConstants
 import com.blankj.utilcode.util.PermissionUtils
 import com.blankj.utilcode.util.Utils
-import com.google.mlkit.vision.barcode.Barcode
+import com.google.mlkit.vision.barcode.common.Barcode
 import com.murgupluoglu.qrreader.QRCameraConfiguration
 import com.murgupluoglu.qrreader.QRReaderFragment
 import com.murgupluoglu.qrreader.QRReaderListener

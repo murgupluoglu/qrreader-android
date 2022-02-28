@@ -1,6 +1,6 @@
 package com.murgupluoglu.qrreader
 
-import com.google.mlkit.vision.barcode.Barcode
+import com.google.mlkit.vision.barcode.common.Barcode
 
 /*
 *  Created by Mustafa Ürgüplüoğlu on 05.07.2019.

@@ -1,8 +1,8 @@
 package com.murgupluoglu.qrreader
 
 import androidx.camera.core.CameraSelector
-import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.common.Barcode
 
 /*
 *  Created by Mustafa Ürgüplüoğlu on 05.07.2019.
