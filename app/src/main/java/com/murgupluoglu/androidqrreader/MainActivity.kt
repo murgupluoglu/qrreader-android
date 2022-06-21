@@ -1,13 +1,16 @@
 package com.murgupluoglu.androidqrreader
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.style.URLSpan
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.camera.core.CameraSelector
 import com.blankj.utilcode.constant.PermissionConstants
 import com.blankj.utilcode.util.PermissionUtils
@@ -42,7 +45,11 @@ class MainActivity : AppCompatActivity() {
         qrCodeReader.setListener(object : QRReaderListener {
 
             override fun onRead(barcode: Barcode, barcodes: List<Barcode>) {
-                qrTextView.text = barcode.displayValue
+                barcode.displayValue?.let {
+                    qrTextView.text = it
+                    fixTextView(qrTextView)
+                }
+
             }
 
             override fun onError(exception: Exception) {
@@ -70,12 +77,6 @@ class MainActivity : AppCompatActivity() {
             qrCodeReader.enableTorch(!qrCodeReader.isTorchOn())
         }
 
-        qrTextView.setOnClickListener {
-            val uriUrl: Uri = Uri.parse(qrTextView.text.toString())
-            val launchBrowser = Intent(Intent.ACTION_VIEW, uriUrl)
-            startActivity(launchBrowser)
-        }
-
         switchCamera.setOnClickListener {
             if (config.lensFacing == CameraSelector.LENS_FACING_BACK) {
                 config.lensFacing = CameraSelector.LENS_FACING_FRONT
@@ -85,4 +86,29 @@ class MainActivity : AppCompatActivity() {
             qrCodeReader.startCamera(this@MainActivity, config)
         }
     }
+
+    private fun fixTextView(tv: TextView) {
+        if (tv.text is SpannableString) {
+            val current = tv.text as SpannableString
+            val spans = current.getSpans(0, current.length, URLSpan::class.java)
+            for (span in spans) {
+                val start = current.getSpanStart(span)
+                val end = current.getSpanEnd(span)
+                current.removeSpan(span)
+                current.setSpan(
+                    DefensiveURLSpan(span.url), start, end,
+                    0
+                )
+            }
+        }
+    }
+
+    class DefensiveURLSpan(private val mUrl: String) : URLSpan(mUrl) {
+        override fun onClick(widget: View) {
+            val uriUrl: Uri = Uri.parse(mUrl)
+            val customTabsIntent: CustomTabsIntent = CustomTabsIntent.Builder().build()
+            customTabsIntent.launchUrl(widget.context, uriUrl)
+        }
+    }
+
 }
